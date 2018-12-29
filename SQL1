@@ -1,0 +1,310 @@
+-- 数据的准备
+	-- 创建一个数据库
+	create database python_test charset=utf8;
+
+	-- 使用一个数据库	
+	use python_test;
+
+	-- 显示当前使用的数据库是哪个？
+	select database();
+
+	-- 创建一个students表
+	create table students(
+	id int unsigned primary key auto_increment not null,
+	name varchar(20) default '',
+	age tinyint unsigned default '0',
+	height decimal(5, 2),
+	gender enum('男','女','保密') default'保密',
+	cls_id int unsigned default 0,
+	is_delete bit default 0
+
+	);
+
+	-- 创建一个classes表
+	create table classes(
+	id int unsigned auto_increment primary key not null,
+	name varchar(30) not null
+
+	);
+
+	-- 向students表中插入数据
+	insert into students values
+		(0, '小明', 18, 188.00, 2, 1, 0),
+		(0, '小月月', 18, 180.00, 2, 2, 1),
+		(0, '彭于晏', 29, 185.00, 1, 1, 0),
+		(0, '刘德华', 59, 175.00, 1, 2, 1),
+		(0, '周杰伦', 36, NULL, 1, 1, 0),
+		(0, '凤姐', 28, 150.00, 3, 2, 1),
+		(0, '刘亦菲', 25, 166.00, 2, 2, 0),
+		(0, '郭靖', 12, 170.00, 1, 2, 0),
+		(0, '周杰', 34, 176.00, 2, 5, 0);
+
+	-- 插入两个班级
+	insert into classes values(0, "python_01期"),(0, "python_02期");
+
+-- 查询
+	--查询所有字段
+	select * from students;
+	select * from classes;
+	-- 查询指定字段
+	select id,name from students;
+	select name, age from students;
+
+	--从多个数据表中查询
+	select students.name, classes.name from students, classes;
+	-- 使用as给字段起别名
+	select name as 姓名, age as 年龄 from students;
+	select s.name, s.name from students as s;
+	
+	-- 消除重复行,去重
+	-- distinct字段
+	select distinct gender from students;
+
+-- 条件查询
+	--比较运算符
+		--select ... from 表名 where....
+		-->
+		--查询大于18岁的信息
+		select * from students where age>18;
+
+		--查询小于18岁的信息
+		select id,name,gender from students where age<18;
+
+	--逻辑运算符
+		-- and
+		-- 18到28之间的所有学生信息
+		select * from students where age>18 and age<28;
+
+		-- 18岁以上的女性
+		select * from students where age>18 and gender="2";
+
+		-- or
+		-- 18以上或者升高超过180（包含）以上的
+		select * from students where age>18 or height>=180;
+
+		-- not
+		-- 不在 18岁以上的女性 这个范围内的信息
+		select * from students where not (age>18 and gender=2);
+		-- 年龄不是小于或者等于18，并且是女性
+		select * from students where (not age<=18) and gender=2;
+
+--模糊查询（效率有点低）
+	-- like(用比较少)
+	-- %替换一个或者多个
+	-- _替换一个
+	-- 查询姓名中以"小"开始的名字
+	select name from students where name like "小%";
+
+	-- 查询姓名中有“小”的名字
+	select name from students where name like "%小%";
+
+	-- 查询有两个字名字的
+	select name from students where name like "__";
+
+	-- 查询有三个字名字的
+	select name from students where name like "___";
+
+	-- 查询至少两个字的名字
+	select name from students where name like "__%";
+
+	--rlike 正则
+	--查询以 周开始的姓名
+	select name from students where name rlike "^周.*"
+
+	--查询以 周开始,以伦结尾的姓名
+	select name from students where name rlike "^周.*伦$"
+
+
+--范围查询
+	-- in(1, 3, 8)表示在一个非连续性的范围内
+	查询 年龄为18、34的 姓名
+	select age from students where age in(12, 18, 34);
+
+	-- not in(1, 3, 8)表示不在一个非连续性的范围内 
+	select age from students where age not in (18, 24, 36)
+	
+
+	-- between .. and ...;在18 到 28范围内
+	select name,age from students where age between 18 and 28;
+
+	-- not between .. and ...;在18 到 28范围内
+	select name,age from students where age not between 18 and 28;
+
+	-- 空判断
+	-- 判空 is null
+	-- 查询身高为空的信息
+	select * from students where height is NULL;
+	-- 判断非空
+	select * from students where height is not NULL;
+
+
+-- 排序
+	-- order by 字段
+	-- asc 从小到大排 升序
+	-- desc 从大到小排 降序
+
+	-- 查询年龄再18到34岁之间的男性，按照年龄从小到大排序
+	select * from students where (age between 18 and 34) and gender = 1;
+	select * from students where (age between 18 and 34) and gender = 1 order by age asc;
+	select * from students where (age between 18 and 34) and gender = 1 order by age desc;
+
+	-- 查询年龄18到34岁之间的女性，身高从高到矮排
+	select * from students where (age between 18 and 34) and gender = 2 order by height desc;
+	select * from students where (age between 18 and 34) and gender = 2 order by height desc, id desc;
+
+-- 聚合函数
+	-- 总数
+	-- count
+	-- 查询男性有多少人，女性有多少人
+	select count(*) from students where gender=1;
+	select count(*) as 男性人数 from students where gender=1;
+
+	-- 最大值 max
+	-- 查询最大的年龄
+	select max(age) from students；
+
+	-- 查询女性最高的身高
+	select max(height) from students where gender=2;
+
+	--最小值 min
+	--求和 sum
+	--平均值 avg
+
+	-- 计算平均年龄
+	select avg(age) from students;
+	-- 计算平均年龄
+	select sum(age)/count(*) from students;
+
+	-- 保留小数
+	select round(avg(age),2) from students;
+
+-- 分组
+	--group by
+	--按照性别分组，查询所有的性别
+	select gender from students group by gender;
+	select gender,max(age) from students group by gender;
+	select gender,avg(age) from students group by gender;
+	select gender,group_concat(mame) from students group by gender;
+
+	group_concat
+	select gender,group_concat(mame) from students where gender=1 group by gender;
+	select gender,group_concat(mame,age,id) from students where gender=1 group by gender;
+	select gender,group_concat(mame, " ", age, "", id) from students where gender=1 group by gender;
+
+	-- having 
+	-- 查询平均年龄超过30岁的性别，姓名 
+	select gender,group_concat(name) from students group by gender having avg(age)>10;
+
+	-- 查询每种性别中的人数大于2的信息
+	select gender,group_concat(name) from students group by gender having count(*)>2;
+
+-- 分页
+	--limit start, count
+
+	-- 限制查询出来的个数
+	select * from students limit 2;
+
+	-- 查询前5个数据
+	select * from students limit 0，5;
+
+	-- 查询id 6-10 (包含)
+	select * from students limit 5，5；
+
+	-- 每页显示2个，第1个页面
+	select * from students limit 0, 2；
+	-- 每页显示2个，第2个页面
+	select * from students limit 2, 2；
+	-- 每页显示2个，第3个页面
+	select * from students limit 4, 2；
+	-- 每页显示2个，第4个页面
+	select * from students limit 6, 2；--------> limit (第N页-1)*每个的个数，每页个数
+
+	select * from students order by desc limit 10, 2; ------->limit只能在order/group by 的最后
+
+	select height from students where gender=2 order by height desc limit 0,2;
+
+-- inner join 内连接
+
+	-- select ... from 表A inner join 表B
+	select * from students inner join classes
+
+	-- 内连接
+	select * from students inner join classes on students.cls_id=classes.id;
+
+	-- 按要求显示班级，姓名
+	select students.*,classes.name from students inner join classes on students.cls_id=classes.id;
+	select classes.name,students.* from students inner join classes on students.cls_id=classes.id order by classes.name, students.id;
+	-- 给数据表起名字
+	select s.name,c.name from students as s inner join classes as c on s.cls_id=c.id;
+
+	select classes.name, students.* from students inner join classes on students.cls_id=classes.id order by classes.name, students.id;
+
+	-- 左链接
+	-- 查询没有对应班级信息的学生
+	-- select ... from AAA left join BBB on.....where....
+	-- select ... from AAA left join BBB on.....having....
+	select * from students left join classes on students.cls_id=classes.id;
+	select * from students left join classes on students.cls_id=classes.id having classes.id is null;
+
+-- 自关联
+create table areas(
+	aid int primary key,
+	atitle varchar(20),
+	pid int
+	);
+-- 先将sql放在桌面，cd到桌面，进入数据库想要的database中
+source xxx.sql;
+
+select province.atitle, city.atitle from areas as province inner join areas as city on city.pid=province.aid having province.atitle="福建省";
+
+select * from areas where pid = (select aid from areas where atitle="福建省");
+-- 子查询(在查询里面嵌套查询)
+-- 查询班里最高的学生
+select * from students where height = (select max(height) from students);
+
+--查询每种类型中最贵的电脑信息
+select * from goods inner join(
+	select cate_name,
+	max(price) as max_price,
+	min(price) as min_price,
+	avg(price) as avf_price,
+	count(*) from goods group by cate_name
+) as goods_news_info
+on goods.cate_name=goods.goods_news_info.cate_name
+
+-- 本表与外键的表进行数据关联 匹配条件之后赋值
+update goods as g inner join goods_cates as c on g.cate_name=c.name set g.cate_name=c.id;
+
+-- 创建一个外键表
+create table brand_name(
+	id int primary key ,
+	title varchar(30),
+);
+
+-- 插入以组排列为结尾的 品牌列表
+insert into brand_name(title) select brand_name from goods group by brand_name;
+
+-- 让本表与外键表数据关联 匹配后赋值
+update goods as g inner join brand_name as b on g.brand_name=b.title set g.brand_name=b.id;
+
+-- 修改g.brand_name的字段名和类型
+alter table goods 
+change brand_name brand_id int unsigned not null,
+change brand_name brand_id int unsigned not null;
+
+-- 外键约束
+alter table goods add foreign key (brand_id) references brand_name(id);
+
+-- 创建数据表的时候就添加外键约束
+create table brand_name(
+	id int primary key ,
+	title varchar(30),
+	foreign key(xxx_id) references 表名(id)
+);
+
+-- 删除外键 
+show create table goods；
+-- 外键名是 ：查出来的乱七八糟的那个
+alter table goods drop foreign key 外键名称；
+
+	
